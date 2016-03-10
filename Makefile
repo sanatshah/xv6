@@ -173,6 +173,7 @@ UPROGS=\
 	_wc\
 	_zombie\
 	_shutdown\
+	_testProg\
 #	_stage1_sigfpe\
 #	_stage1_sigalrm\
 #	_stage2\
