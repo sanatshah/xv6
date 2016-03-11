@@ -70,7 +70,9 @@ struct proc {
 	
   /*Signal Code*/
 
- 	int signal_handlers[2];
+ 	uint signal_handlers[2];
+	uint alarm_time;
+	uint alarm_counter;
 };
 
 // Process memory is laid out contiguously, low addresses first:

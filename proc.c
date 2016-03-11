@@ -65,6 +65,12 @@ found:
   sp -= 4;
   *(uint*)sp = (uint)trapret;
 
+	/*signal code*/ 
+	p->alarm_time=0;
+	p->alarm_counter=0; 
+	p->signal_handlers[0]=-1; 
+	p->signal_handlers[1]=-1;
+
   sp -= sizeof *p->context;
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);

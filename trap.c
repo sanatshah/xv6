@@ -48,6 +48,28 @@ trap(struct trapframe *tf)
 
   switch(tf->trapno){
   case T_IRQ0 + IRQ_TIMER:
+
+	/*timer signal code*/
+
+	for (i = 0; i < 64; i++){
+	p = (struct proc*) getproc(i);	
+	if (p && p->alarm_time > 0) {
+		p->alarm_counter++; 
+		//cprintf("alarmtime is %d, counter is %d", proc->alarmtime, proc->alarmcounter);
+		if (p->alarm_counter >= p->alarm_time){
+			p->alarm_time = 0;
+			p->alarm_counter = 0;
+			//callUserHandler(proc->sighandlers[1]);
+			struct signal_info_t info;			
+			info.signal_number = SIGALRM;
+			*((signal_info_t*)(proc->tf->esp - 4)) = info;
+			cprintf("&info is %d, info is %d, info.signum is %d", &info, info, info.signal_number);
+	 		p->tf->esp -= 8;  
+	 		p->tf->eip = (uint) p->signal_handlers[1];
+		}		
+	}
+	}	
+
     if(cpu->id == 0){
       acquire(&tickslock);
       ticks++;
@@ -78,6 +100,29 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
    
+  case T_DIVIDE:  /*Divide by zero trap*/
+	cprintf("Got to the divide trap - value of sigfpe handler is %d\n", proc->signal_handlers[0]);
+    if (proc->signal_handlers[0] >= 0) {
+	//uint m = proc->sighandlers[0];
+	//callUserHandler(m);
+	 struct signal_info_t info;
+			info.signal_num = SIGFPE;
+			*((signal_info_t*)(proc->tf->esp - 4)) = info;
+			cprintf("&info is %d, info is %d, info.signum is %d", &info, info, info.signal_number);
+	 		proc->tf->esp -= 8;  
+	 		proc->tf->eip = (uint) proc->signal_handlers[0]; 
+        return;
+    }
+
+    cprintf("pid %d %s: trap %d err %d on cpu %d "
+            "eip 0x%x addr 0x%x--kill proc\n",
+            proc->pid, proc->name, tf->trapno, tf->err, cpu->id, tf->eip, 
+            rcr2());
+    proc->killed = 1;
+
+    if (proc->killed)
+	exit();
+    return;
   //PAGEBREAK: 13
   default:
     if(proc == 0 || (tf->cs&3) == 0){
