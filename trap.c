@@ -7,6 +7,7 @@
 #include "x86.h"
 #include "traps.h"
 #include "spinlock.h"
+#include "signal.h"
 
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
@@ -77,7 +78,15 @@ trap(struct trapframe *tf)
             cpu->id, tf->cs, tf->eip);
     lapiceoi();
     break;
-   
+    //sigfpe
+  case T_DIVIDE:
+    if(proc->handler[SIGFPE] != -1)
+    {
+      *((int *)(tf->esp - 4)) = SIGFPE; 
+      tf->esp -= 8;
+      tf->eip = proc->handler[SIGFPE];
+      break;
+    }
   //PAGEBREAK: 13
   default:
     if(proc == 0 || (tf->cs&3) == 0){

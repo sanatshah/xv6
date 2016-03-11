@@ -7,4 +7,15 @@
 // At a minimum you must define the signal constants themselves
 // as well as a sighandler_t type.
 
+#define SIGFPE	0
+#define SIGALRM 1
+
+typedef struct
+{
+	int signum;
+} siginfo_t;
+
+typedef void (*sighandler_t)(siginfo_t);
+int signal(int signum, sighandler_t func);	
+
 #endif

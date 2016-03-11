@@ -8,6 +8,20 @@
 #include "proc.h"
 
 int
+sys_register_signal_handler(void)
+{
+	int signum;
+	int handler;
+	
+	if(argint(0, &signum) < 0)
+		return -1;
+	if(argint(1, &handler) < 0)
+		return -1;
+	proc->handler[signum] = handler;
+	return handler;
+}
+
+int
 sys_fork(void)
 {
   return fork();

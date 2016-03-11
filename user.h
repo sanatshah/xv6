@@ -1,3 +1,5 @@
+#include "signal.h"
+
 struct stat;
 struct rtcdate;
 
@@ -24,6 +26,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int halt(void);
+int register_signal_handler(int signum, sighandler_t handler);
 
 // ulib.c
 int stat(char*, struct stat*);
@@ -38,3 +41,4 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+int signal(int signum, sighandler_t handler);

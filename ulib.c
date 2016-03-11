@@ -4,6 +4,12 @@
 #include "user.h"
 #include "x86.h"
 
+int signal(int signum, sighandler_t handler)
+{
+	int x = register_signal_handler(signum, handler);
+	return x;
+}
+
 char*
 strcpy(char *s, char *t)
 {
