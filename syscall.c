@@ -1,11 +1,12 @@
 #include "types.h"
 #include "defs.h"
 #include "param.h"
-#include "memlayout.h"
+#include "memlayout.h"					
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
 #include "syscall.h"
+#include "signal.h"
 
 // User code makes a system call with INT T_SYSCALL.
 // System call number in %eax.
@@ -77,6 +78,12 @@ argstr(int n, char **pp)
   return fetchstr(addr, pp);
 }
 
+//int 
+//register_signal_handler(int signum, sighandler_t handler)
+//{
+//return 0;
+//}
+
 extern int sys_chdir(void);
 extern int sys_close(void);
 extern int sys_dup(void);
@@ -99,8 +106,8 @@ extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_halt(void);
-extern int sys_sig_Regis(void);
-extern int sys_sig_Alarm(void);
+extern int sys_signal_Alarm(void);
+extern int sys_signal_Regis(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -125,8 +132,8 @@ static int (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_halt]    sys_halt,
-[SYS_sig_Regis]    sys_sig_Regis,
-[SYS_sig_Alarm]    sys_sig_Alarm,
+[SYS_signal_Regis]  sys_signal_Regis,
+[SYS_signal_Alarm]   sys_signal_Alarm,
 };
 
 void
@@ -135,6 +142,7 @@ syscall(void)
   int num;
 
   num = proc->tf->eax;
+
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     proc->tf->eax = syscalls[num]();
   } else {

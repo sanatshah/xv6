@@ -42,7 +42,7 @@ allocproc(void)
     if(p->state == UNUSED)
       goto found;
   release(&ptable.lock);
-  return 0;
+  return 0;	
 
 found:
   p->state = EMBRYO;
@@ -65,16 +65,16 @@ found:
   sp -= 4;
   *(uint*)sp = (uint)trapret;
 
-	/*signal code*/ 
-	p->alarm_time=0;
-	p->alarm_counter=0; 
-	p->signal_handlers[0]=-1; 
-	p->signal_handlers[1]=-1;
-
   sp -= sizeof *p->context;
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
+	
+/*signal stuff*/
+  p->alarm_Time = 0; 
+  p->alarm_Counter = 0; 
+  p->signal_handler[0] = -1;
+  p->signal_handler[1] = -1;
 
   return p;
 }
@@ -126,6 +126,10 @@ growproc(int n)
   proc->sz = sz;
   switchuvm(proc);
   return 0;
+}
+
+struct proc* getproc (int x){
+return &ptable.proc[x];
 }
 
 // Create a new process copying p as the parent.
@@ -345,7 +349,8 @@ forkret(void)
     // of a regular process (e.g., they call sleep), and thus cannot 
     // be run from main().
     first = 0;
-    initlog();
+    iinit(ROOTDEV);
+    initlog(ROOTDEV);
   }
   
   // Return to "caller", actually trapret (see allocproc).

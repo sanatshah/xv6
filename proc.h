@@ -1,3 +1,5 @@
+#include "signal.h"
+
 // Segments in proc->gdt.
 #define NSEGS     7
 
@@ -16,6 +18,7 @@ struct cpu {
   struct proc *proc;           // The currently-running process.
 };
 
+extern struct proc* getproc (int);
 extern struct cpu cpus[NCPU];
 extern int ncpu;
 
@@ -67,12 +70,10 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
 
-	
-  /*Signal Code*/
-
- 	uint signal_handlers[2];
-	uint alarm_time;
-	uint alarm_counter;
+	/*signal variables*/
+  	uint signal_handler[2]; 	        
+  	uint alarm_Time;		 
+  	uint alarm_Counter;		 
 };
 
 // Process memory is laid out contiguously, low addresses first:

@@ -88,9 +88,17 @@ atoi(const char *s)
 
   n = 0;
   while('0' <= *s && *s <= '9')
-    n = n*10 + *s++ - '0';
+    n = n*10 + *s++ - '0';	
   return n;
 }
+
+int 
+signal(int signum, signal_handler_t handler)
+{
+	int temp = signal_Regis(signum, handler);
+	return temp;
+}
+
 
 void*
 memmove(void *vdst, void *vsrc, int n)
@@ -103,13 +111,8 @@ memmove(void *vdst, void *vsrc, int n)
     *dst++ = *src++;
   return vdst;
 }
-int 
-signal(int signal_number, signal_handler_t handler)
-{
-  int x = sigreg(signal_number, handler);
-  return x;
-}
 int alarm(int time){
-  int x = sigalrm(time);
-  return x;
+	int temp = signal_Alarm(time);
+ 	return temp;
 }
+
