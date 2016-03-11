@@ -7,8 +7,8 @@
 #define SIGFPE 50
 #define SIGALRM 100
 
-typedef void (sighandler_t)(siginfo_t);
-int signal(int signum, sighandler_t func);	
+typedef void (signal_handler_t)(siginfo_t);
+int signal(int signum, signal_handler_t func);	
 
 typedef struct siginfo_t {
 int signum;

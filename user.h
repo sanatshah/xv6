@@ -41,4 +41,4 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
-int signal(int signum, sighandler_t handler);
+int signal(int signum, signal_handler_t handler);

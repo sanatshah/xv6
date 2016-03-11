@@ -65,15 +65,16 @@ found:
   sp -= 4;
   *(uint*)sp = (uint)trapret;
 
+  p->alrmtime = 0; 
+  p->alarm_counter = 0; 
+  p->signal_handlers[0] = -1;
+  p->signal_handlers[1] = -1;
+
   sp -= sizeof *p->context;
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 	
-  p->sighandlers[0] = -1;
-  p->sighandlers[1] = -1;
-  p->alarmtime = 0; 
-  p->alarmcounter = 0; 
   return p;
 }
 

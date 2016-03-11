@@ -105,7 +105,7 @@ memmove(void *vdst, void *vsrc, int n)
 }
 
 int 
-signal(int signum, sighandler_t handler)
+signal(int signum, signal_handler_t handler)
 {
   int x = sigreg(signum, handler);
   return x;

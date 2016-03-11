@@ -62,8 +62,8 @@ struct proc *p;
 
   switch(tf->trapno){
   case T_DIVIDE: 
-    cprintf("Got to the divide trap - value of sigfpe handler is %d\n", proc->sighandlers[0]);
-    if (proc->sighandlers[0] >= 0) {
+    cprintf("Got to the divide trap - value of sigfpe handler is %d\n", proc->signal_handlers[0]);
+    if (proc->signal_handlers[0] >= 0) {
 	//uint m = proc->sighandlers[0];
 	//callUserHandler(m);
 	 struct siginfo_t info;
@@ -71,7 +71,7 @@ struct proc *p;
 			*((siginfo_t*)(proc->tf->esp - 4)) = info;
 			cprintf("&info is %d, info is %d, info.signum is %d", &info, info, info.signum);
 	 		proc->tf->esp -= 8;  
-	 		proc->tf->eip = (uint) proc->sighandlers[0]; 
+	 		proc->tf->eip = (uint) proc->signal_handlers[0]; 
         return;
     }
 
@@ -88,19 +88,19 @@ struct proc *p;
 	
 	for (i = 0; i < 64; i++){
 	p = (struct proc*) getproc(i);	
-	if (p && p->alarmtime > 0) {
-		p->alarmcounter++; 
+	if (p && p->alrmtime > 0) {
+		p->alarm_counter++; 
 		//cprintf("alarmtime is %d, counter is %d", proc->alarmtime, proc->alarmcounter);
-		if (p->alarmcounter >= p->alarmtime){
-			p->alarmtime = 0;
-			p->alarmcounter = 0;
+		if (p->alarm_counter >= p->alrmtime){
+			p->alrmtime = 0;
+			p->alarm_counter = 0;
 			//callUserHandler(proc->sighandlers[1]);
 			struct siginfo_t info;			
 			info.signum = SIGALRM;
 			*((siginfo_t*)(proc->tf->esp - 4)) = info;
 			cprintf("&info is %d, info is %d, info.signum is %d", &info, info, info.signum);
 	 		p->tf->esp -= 8;  
-	 		p->tf->eip = (uint) p->sighandlers[1];
+	 		p->tf->eip = (uint) p->signal_handlers[1];
 		}		
 	}
 	}	
