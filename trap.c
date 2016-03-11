@@ -7,12 +7,14 @@
 #include "x86.h"
 #include "traps.h"
 #include "spinlock.h"
+#include "signal.h"
 
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
+
 
 void
 tvinit(void)
@@ -32,10 +34,22 @@ idtinit(void)
   lidt(idt, sizeof(idt));
 }
 
+void callUserHandler(uint sighandler) 
+{ 
+// char* addr = uva2ka(proc->pgdir, (char*)proc->tf->esp); 
+// if ((proc->tf->esp & 0xFFF) == 0) 
+// panic("esp_offset == 0");  
+// *(int*)(addr + ((proc->tf->esp - 4) & 0xFFF)) = proc->tf->eip;
+
+} 
+
 //PAGEBREAK: 41
 void
 trap(struct trapframe *tf)
 {
+int i;
+struct proc *p;
+//cprintf("trap occurs with trapno %d, T_DIVIDE is %d\n", tf->trapno, T_DIVIDE);
   if(tf->trapno == T_SYSCALL){
     if(proc->killed)
       exit();
@@ -47,8 +61,51 @@ trap(struct trapframe *tf)
   }
 
   switch(tf->trapno){
+  case T_DIVIDE: 
+    cprintf("Got to the divide trap - value of sigfpe handler is %d\n", proc->sighandlers[0]);
+    if (proc->sighandlers[0] >= 0) {
+	//uint m = proc->sighandlers[0];
+	//callUserHandler(m);
+	 struct siginfo_t info;
+			info.signum = SIGFPE;
+			*((siginfo_t*)(proc->tf->esp - 4)) = info;
+			cprintf("&info is %d, info is %d, info.signum is %d", &info, info, info.signum);
+	 		proc->tf->esp -= 8;  
+	 		proc->tf->eip = (uint) proc->sighandlers[0]; 
+        return;
+    }
+
+    cprintf("pid %d %s: trap %d err %d on cpu %d "
+            "eip 0x%x addr 0x%x--kill proc\n",
+            proc->pid, proc->name, tf->trapno, tf->err, cpu->id, tf->eip, 
+            rcr2());
+    proc->killed = 1;
+
+    if (proc->killed)
+	exit();
+    return;
   case T_IRQ0 + IRQ_TIMER:
-    if(cpu->id == 0){
+	
+	for (i = 0; i < 64; i++){
+	p = (struct proc*) getproc(i);	
+	if (p && p->alarmtime > 0) {
+		p->alarmcounter++; 
+		//cprintf("alarmtime is %d, counter is %d", proc->alarmtime, proc->alarmcounter);
+		if (p->alarmcounter >= p->alarmtime){
+			p->alarmtime = 0;
+			p->alarmcounter = 0;
+			//callUserHandler(proc->sighandlers[1]);
+			struct siginfo_t info;			
+			info.signum = SIGALRM;
+			*((siginfo_t*)(proc->tf->esp - 4)) = info;
+			cprintf("&info is %d, info is %d, info.signum is %d", &info, info, info.signum);
+	 		p->tf->esp -= 8;  
+	 		p->tf->eip = (uint) p->sighandlers[1];
+		}		
+	}
+	}	
+
+    if(cpu->id == 0){		
       acquire(&tickslock);
       ticks++;
       wakeup(&ticks);

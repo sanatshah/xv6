@@ -42,7 +42,7 @@ allocproc(void)
     if(p->state == UNUSED)
       goto found;
   release(&ptable.lock);
-  return 0;
+  return 0;	
 
 found:
   p->state = EMBRYO;
@@ -69,7 +69,11 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
-
+	
+  p->sighandlers[0] = -1;
+  p->sighandlers[1] = -1;
+  p->alarmtime = 0; 
+  p->alarmcounter = 0; 
   return p;
 }
 
@@ -120,6 +124,10 @@ growproc(int n)
   proc->sz = sz;
   switchuvm(proc);
   return 0;
+}
+
+struct proc* getproc (int x){
+return &ptable.proc[x];
 }
 
 // Create a new process copying p as the parent.

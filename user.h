@@ -1,3 +1,5 @@
+#include "signal.h"
+
 struct stat;
 struct rtcdate;
 
@@ -20,11 +22,11 @@ int mkdir(char*);
 int chdir(char*);
 int dup(int);
 int getpid(void);
-int mygetpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int halt(void);
+
 
 // ulib.c
 int stat(char*, struct stat*);
@@ -39,3 +41,4 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+int signal(int signum, sighandler_t handler);
