@@ -7,6 +7,21 @@
 #include "mmu.h"
 #include "proc.h"
 
+int 
+sys_signal_alarm(void)
+{
+	int time; 
+
+	if(argint(0, &time) < 0)
+	    return -1;
+
+	time = time*100;
+
+	if (proc->alarmtime == 0)
+	    proc->alarmtime = time;
+
+	return proc->alarmtime - proc->alarmcounter; 
+}
 int
 sys_register_signal_handler(void)
 {

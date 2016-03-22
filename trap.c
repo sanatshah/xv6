@@ -49,6 +49,18 @@ trap(struct trapframe *tf)
 
   switch(tf->trapno){
   case T_IRQ0 + IRQ_TIMER:
+  	if(proc && proc->alarmtime>0){
+		proc->alarmcounter++; 
+		if (proc->alarmcounter >= proc->alarmtime){
+			proc->alarmtime = 0;
+			proc->alarmcounter = 0;
+			siginfo_t info;			
+			info.signum = SIGALRM;
+			*((siginfo_t*)(proc->tf->esp - 4)) = info;
+	 		proc->tf->esp -= 8;  
+	 		proc->tf->eip = (uint) proc->handler[1];
+		}		
+	}
     if(cpu->id == 0){
       acquire(&tickslock);
       ticks++;
@@ -113,7 +125,7 @@ trap(struct trapframe *tf)
   // If interrupts were on while locks held, would need to check nlock.
   if(proc && proc->state == RUNNING && tf->trapno == T_IRQ0+IRQ_TIMER)
     yield();
-
+  
   // Check if the process has been killed since we yielded
   if(proc && proc->killed && (tf->cs&3) == DPL_USER)
     exit();

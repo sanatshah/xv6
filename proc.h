@@ -68,6 +68,8 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
   int handler[256];
+  uint alarmtime;		// Time after which alarm signal should be sent 
+  uint alarmcounter;		// Current time 
 };
 
 

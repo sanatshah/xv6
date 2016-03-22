@@ -50,6 +50,8 @@ found:
   int i;
   for(i = 0; i < 256; ++i)
     p->handler[i] = -1;
+  p->alarmtime = 0; 
+  p->alarmcounter = 0; 
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -72,7 +74,7 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
-
+ 
   return p;
 }
 

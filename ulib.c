@@ -6,8 +6,12 @@
 
 int signal(int signum, sighandler_t handler)
 {
-	int x = register_signal_handler(signum, handler);
-	return x;
+	return register_signal_handler(signum, handler);
+}
+
+int alarm(int time)
+{
+	return signal_alarm(time);
 }
 
 char*

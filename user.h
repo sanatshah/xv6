@@ -27,6 +27,7 @@ int sleep(int);
 int uptime(void);
 int halt(void);
 int register_signal_handler(int signum, sighandler_t handler);
+int signal_alarm(int time);
 
 // ulib.c
 int stat(char*, struct stat*);
@@ -42,3 +43,4 @@ void* malloc(uint);
 void free(void*);
 int atoi(const char*);
 int signal(int signum, sighandler_t handler);
+int alarm(int time);
