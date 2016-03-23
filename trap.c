@@ -59,6 +59,7 @@ trap(struct trapframe *tf)
 			*((siginfo_t*)(proc->tf->esp - 4)) = info;
 	 		proc->tf->esp -= 8;  
 	 		proc->tf->eip = (uint) proc->handler[1];
+			proc->tf->ecx = tf->ecx;
 		}		
 	}
     if(cpu->id == 0){

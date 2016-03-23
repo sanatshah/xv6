@@ -27,11 +27,27 @@ sys_register_signal_handler(void)
 {
 	int signum;
 	int handler;
+	int wrapper;
+
+	struct trapframe *tf;
 	
 	if(argint(0, &signum) < 0)
 		return -1;
 	if(argint(1, &handler) < 0)
 		return -1;
+	if(argint(2, &wrapper) < 0)
+		return -1;
+
+	//push register on user stack
+
+	*((uint*)(tf->esp-4)) = tf->eip; //instruction pointer
+	*((uint*)(tf->esp-8)) = tf->eax; //Volatile registers
+	*((uint*)(tf->esp-12)) = tf->ecx;
+	*((uint*)(tf->esp-16)) = tf->edx;
+
+	//save wrapper function address on user stack
+	*((uint*)(tf->esp-20)) = (uint) wrapper;
+
 	proc->handler[signum] = handler;
 	return handler;
 }

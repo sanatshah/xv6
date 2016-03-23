@@ -70,6 +70,7 @@ struct proc {
   int handler[256];
   uint alarmtime;		// Time after which alarm signal should be sent 
   uint alarmcounter;		// Current time 
+  uint wrapper;                 // Wrapper function for volatile registers
 };
 
 

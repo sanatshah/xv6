@@ -26,7 +26,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int halt(void);
-int register_signal_handler(int signum, sighandler_t handler);
+int register_signal_handler(int signum, sighandler_t handler, uint wrapper);
 int signal_alarm(int time);
 
 // ulib.c
@@ -44,3 +44,4 @@ void free(void*);
 int atoi(const char*);
 int signal(int signum, sighandler_t handler);
 int alarm(int time);
+int wrapper(void);

@@ -4,10 +4,22 @@
 #include "user.h"
 #include "x86.h"
 
+int wrapper(void){
+//volatile register handler
+
+//pop registers of user stack, save back to register
+
+	printf(1, "Entered wrapper function");
+
+
+	return 0;
+}
+
 int signal(int signum, sighandler_t handler)
 {
-	return register_signal_handler(signum, handler);
+	return register_signal_handler(signum, handler, &wrapper);
 }
+
 
 int alarm(int time)
 {
