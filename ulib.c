@@ -5,13 +5,18 @@
 #include "x86.h"
 
 int wrapper(void){
-//volatile register handler
-
-//pop registers of user stack, save back to register
+	//pop registers of user stack, save back to register
+	__asm__ ( 
+	
+		"add $8, %esp;"
+		"pop %edx;"
+		"pop %ecx;"
+		"pop %eax;"
+		"ret"
+	
+	); 
 
 	printf(1, "Entered wrapper function");
-
-
 	return 0;
 }
 
