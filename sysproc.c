@@ -36,17 +36,6 @@ sys_register_signal_handler(void)
 	if(argint(2, &wrapper) < 0)
 		return -1;
 
-	cprintf("entered sys sighandler\n");
-	//push register on user stack
-
-	//*((uint*)(proc->tf->esp-4)) = tf->eip; //instruction pointer
-	//*((uint*)(proc->tf->esp-4)) = tf->eax; //Volatile registers
-	//*((uint*)(proc->tf->esp-8)) = tf->ecx;
-	//*((uint*)(proc->tf->esp-12)) = tf->edx;
-	//proc->tf->esp -= 12;
-
-	//save wrapper function address on user stack
-	//*((uint*)(tf->esp-20)) = (uint) wrapper;
 	proc->wrapper = wrapper;
 	proc->handler[signum] = handler;
 	return handler;

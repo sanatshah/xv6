@@ -5,7 +5,6 @@
 #include "x86.h"
 
 int wrapper(void){
-	printf(1, "Entered wrapper function\n");
 	//pop registers of user stack, save back to register
 	__asm__ (
 		"movl 0x8(%ebp),%edx\n\t"
@@ -15,8 +14,6 @@ int wrapper(void){
 		"movl %ebp,%esp\n\t"
 		"ret\n\t"
 	);
-
-	printf(1, "exiting wrapper function\n");
 	
 	return 0;
 }

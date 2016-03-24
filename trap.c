@@ -66,7 +66,6 @@ trap(struct trapframe *tf)
 			*((uint*) (proc->tf->esp - 24)) = proc->wrapper;
 			proc->tf->esp-=24;
 			proc->tf->eip = (uint) proc->handler[1];
-			cprintf("exiting trap\n");
 		}
 	}
     if(cpu->id == 0){
