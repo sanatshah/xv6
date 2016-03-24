@@ -56,11 +56,18 @@ trap(struct trapframe *tf)
 			proc->alarmcounter = 0;
 			siginfo_t info;			
 			info.signum = SIGALRM;
-			*((siginfo_t*)(proc->tf->esp - 4)) = info;
-	 		proc->tf->esp -= 8;  
-	 		proc->tf->eip = (uint) proc->handler[1];
-			proc->tf->ecx = tf->ecx;
-		}		
+			
+			uint old_eip = proc->tf->eip;
+			*((uint*)(proc->tf->esp-4)) = old_eip;
+			*((uint*)(proc->tf->esp-8)) = tf->eax; //Volatile registers
+			*((uint*)(proc->tf->esp-12)) = tf->ecx;
+			*((uint*)(proc->tf->esp-16)) = tf->edx;
+			*((siginfo_t*)(proc->tf->esp - 20)) = info;
+			*((uint*) (proc->tf->esp - 24)) = proc->wrapper;
+			proc->tf->esp-=24;
+			proc->tf->eip = (uint) proc->handler[1];
+			cprintf("exiting trap\n");
+		}
 	}
     if(cpu->id == 0){
       acquire(&tickslock);

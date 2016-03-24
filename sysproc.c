@@ -28,8 +28,6 @@ sys_register_signal_handler(void)
 	int signum;
 	int handler;
 	int wrapper;
-
-	struct trapframe *tf;
 	
 	if(argint(0, &signum) < 0)
 		return -1;
@@ -38,16 +36,18 @@ sys_register_signal_handler(void)
 	if(argint(2, &wrapper) < 0)
 		return -1;
 
+	cprintf("entered sys sighandler\n");
 	//push register on user stack
 
-	*((uint*)(tf->esp-4)) = tf->eip; //instruction pointer
-	*((uint*)(tf->esp-8)) = tf->eax; //Volatile registers
-	*((uint*)(tf->esp-12)) = tf->ecx;
-	*((uint*)(tf->esp-16)) = tf->edx;
+	//*((uint*)(proc->tf->esp-4)) = tf->eip; //instruction pointer
+	//*((uint*)(proc->tf->esp-4)) = tf->eax; //Volatile registers
+	//*((uint*)(proc->tf->esp-8)) = tf->ecx;
+	//*((uint*)(proc->tf->esp-12)) = tf->edx;
+	//proc->tf->esp -= 12;
 
 	//save wrapper function address on user stack
-	*((uint*)(tf->esp-20)) = (uint) wrapper;
-
+	//*((uint*)(tf->esp-20)) = (uint) wrapper;
+	proc->wrapper = wrapper;
 	proc->handler[signum] = handler;
 	return handler;
 }
