@@ -101,10 +101,19 @@ trap(struct trapframe *tf)
   case T_DIVIDE:
     if(proc->handler[SIGFPE] != -1)
     {
-      *((int *)(tf->esp - 4)) = SIGFPE; 
-      tf->esp -= 8;
-      tf->eip = proc->handler[SIGFPE];
-      break;
+	siginfo_t info;			
+	info.signum = SIGFPE;
+
+	uint old_eip = proc->tf->eip;
+	*((uint*)(proc->tf->esp-4)) = old_eip;
+	*((uint*)(proc->tf->esp-8)) = tf->eax; //Volatile registers
+	*((uint*)(proc->tf->esp-12)) = tf->ecx;
+	*((uint*)(proc->tf->esp-16)) = tf->edx;
+	*((siginfo_t*)(proc->tf->esp - 20)) = info;
+	*((uint*) (proc->tf->esp - 24)) = proc->wrapper;
+	proc->tf->esp-=24;
+	proc->tf->eip = (uint) proc->handler[SIGFPE];
+	break;
     }
   //PAGEBREAK: 13
   default:
