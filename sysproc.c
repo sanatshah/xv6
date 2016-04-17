@@ -1,4 +1,4 @@
-#include "types.h"
+ #include "types.h"
 #include "x86.h"
 #include "defs.h"
 #include "date.h"
@@ -11,6 +11,24 @@ int
 sys_fork(void)
 {
   return fork();
+}
+
+int
+sys_clone(void)
+{
+  void *func;
+	void *arg;
+	void *stack;
+
+
+	if(argint(0,func) < -1)
+		return -1;
+	if(argint(1,arg) < -1)
+		return -1;
+	if(argint(2,stack) < -1)
+		return -1;
+
+  return clone(func, arg, stack);
 }
 
 int
@@ -61,7 +79,7 @@ sys_sleep(void)
 {
   int n;
   uint ticks0;
-  
+
   if(argint(0, &n) < 0)
     return -1;
   acquire(&tickslock);
@@ -83,7 +101,7 @@ int
 sys_uptime(void)
 {
   uint xticks;
-  
+
   acquire(&tickslock);
   xticks = ticks;
   release(&tickslock);

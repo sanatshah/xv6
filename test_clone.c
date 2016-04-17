@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 		pids[i] = clone(thread, args[i], stacks[i]);
 		printf(1, "main: created thread with pid %d\n", pids[i]);
 	}
-	
+
 	// Wait for all children
 	for (i=0; i<NUM_THREADS; i++) {
 		void *joinstack;
