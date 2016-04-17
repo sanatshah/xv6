@@ -181,18 +181,11 @@ clone(void (*func)(void *), void *arg, void *stack){
   np->parent = proc;
   *np->tf = *proc->tf;
 
-  //set up new kernel stack
-  np->kstack = kalloc();
-
-  //have to give process its own stack
-
   //set instruction pointer to new function
   np->tf->eip = (uint)func;
 
   //add args to the top of the stack
   np->tf->esp = ((uint)stack) + 4096 - 4;
-
-  // create a uint pointer for the address of the new argument
   *(uint *)(np->tf->esp) = (uint)arg ;
   *(uint *)(np->tf->esp-4) = (uint)0xFFFFFFF ;
 

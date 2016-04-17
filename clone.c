@@ -6,8 +6,7 @@
 
 void* test(void *arg){
   printf(1,"function worked, in child thread");
-
-  exit();
+  
 }
 
 int main(int argc, char **argv){
