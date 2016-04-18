@@ -243,8 +243,8 @@ texit(void* retval)
   wakeup1(proc->parent);
 
   //pass possible return value back to joined parent
-  proc->parent->tf->eax=(uint)retval;
-  proc->retval=(uint)retval;
+  //proc->parent->tf->eax=(int*)retval;
+  proc->retval=retval;
 
   // Pass abandoned children to parent of proc.
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -285,6 +285,9 @@ join(void* p_id, void* stack, void* retval){
       havekids = 1;
       if(p->state == ZOMBIE){
         // Found one.
+
+        *(int*)retval=(int)p->retval;
+
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;

@@ -69,12 +69,14 @@ int main(int argc, char **argv)
 		void *retval;
 		int r;
 		r = join(pids[i], &joinstack, &retval);
+
 		if (r < 0) {
 			passed = 0;
 		}
 		if (*(int*)retval != i) {
 			passed = 0;
 		}
+
 		printf(1, "main: thread %d joined...retval=%d\n", i, *(int*)retval);
 	}
 

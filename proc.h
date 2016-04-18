@@ -67,7 +67,7 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
   int thread;                  // 1 -> is thread 0 0-> not thread
-  uint retval;
+  void* retval;
   char* ustack;
 };
 
