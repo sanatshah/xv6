@@ -287,20 +287,19 @@ exit(void)
   end_op();
   proc->cwd = 0;
 
-
   acquire(&ptable.lock);
 
   // Parent might be sleeping in wait().
   wakeup1(proc->parent);
 
-  // Pass abandoned children to init.
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 
-    //if process has thread children, kill em
+    //if process has thread children, kill them
     if ((p->parent == proc) && (p->thread==1)){
-      p->state = zombie;
+      p->state = ZOMBIE;
     }
 
+    // Pass abandoned children to init.
     if(p->parent == proc){
       p->parent = initproc;
       if(p->state == ZOMBIE)
@@ -514,11 +513,20 @@ int
 kill(int pid)
 {
   struct proc *p;
+  struct proc *a;
 
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->pid == pid){
       p->killed = 1;
+
+      //kill thread children
+      for(a = ptable.proc; a <&ptable.proc[NPROC]; a++){
+        if ((a->parent == p) && (a->thread==1)){
+          a->state = ZOMBIE;
+        }
+      }
+
       // Wake process from sleep if necessary.
       if(p->state == SLEEPING)
         p->state = RUNNABLE;
