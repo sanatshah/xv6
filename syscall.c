@@ -100,6 +100,7 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_halt(void);
 extern int sys_clone(void);
+extern int sys_texit(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -125,6 +126,7 @@ static int (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_halt]    sys_halt,
 [SYS_clone]    sys_clone,
+[SYS_texit]    sys_texit,
 
 };
 

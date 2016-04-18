@@ -6,7 +6,7 @@
 
 void* test(void *arg){
   printf(1,"function worked, in child thread");
-  
+
 }
 
 int main(int argc, char **argv){
@@ -35,5 +35,5 @@ int main(int argc, char **argv){
     printf(1,"clone failed");
   }
 
-  exit();
+  texit();
 }

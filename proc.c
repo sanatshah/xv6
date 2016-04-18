@@ -181,6 +181,9 @@ clone(void (*func)(void *), void *arg, void *stack){
   np->parent = proc;
   *np->tf = *proc->tf;
 
+  //update variables that maintian information if thread
+  np->thread=1;
+
   //set instruction pointer to new function
   np->tf->eip = (uint)func;
 
@@ -214,6 +217,50 @@ clone(void (*func)(void *), void *arg, void *stack){
 
 }
 
+int
+texit(void* retval)
+{
+
+  struct proc *p;
+
+  if(proc == initproc)
+    panic("init exiting");
+
+  begin_op();
+  iput(proc->cwd);
+  end_op();
+  proc->cwd = 0;
+
+  acquire(&ptable.lock);
+
+  // Parent might be sleeping in wait().
+  wakeup1(proc->parent);
+
+  //pass possible return value back to joined parent
+  proc->parent->tf->eax=(uint)retval;
+
+  // Pass abandoned children to parent of proc.
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->parent == proc){
+
+      //if child is a thread, make current threads parent a parent of the childs
+      if(p->thread==1)
+        p->parent = proc->parent;
+
+      //if child is a process, make parent initproc
+      if (p->thread==0)
+        p->parent = initproc;
+    }
+  }
+
+  // Jump into the scheduler, never to return.
+  proc->state = ZOMBIE;
+  sched();
+  panic("zombie exit");
+
+
+}
+
 
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state
@@ -239,6 +286,8 @@ exit(void)
   iput(proc->cwd);
   end_op();
   proc->cwd = 0;
+
+  //pass pointer back to join
 
   acquire(&ptable.lock);
 

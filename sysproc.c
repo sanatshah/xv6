@@ -32,6 +32,17 @@ sys_clone(void)
 }
 
 int
+sys_texit(void)
+{
+  void *retval;
+
+  if(argint(0,retval) < -1)
+    return -1;
+
+  return texit(retval);
+}
+
+int
 sys_exit(void)
 {
   exit();
