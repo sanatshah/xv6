@@ -170,6 +170,8 @@ int
 clone(void (*func)(void *), void *arg, void *stack){
   int i, pid;
   struct proc *np;
+  int *myarg;
+  int *myret;
 
   // Allocate process.
   if((np = allocproc()) == 0)
@@ -185,18 +187,22 @@ clone(void (*func)(void *), void *arg, void *stack){
   np->thread=1;
 
   //set instruction pointer to new function
-  np->tf->eip = (uint)func;
+  np->tf->eip = (int)func;
 
-  //add args to the top of the stack
-  np->tf->esp = ((uint)stack) + 4096 - 4;
-  *(uint *)(np->tf->esp) = (uint)arg ;
-  *(uint *)(np->tf->esp-4) = (uint)0xFFFFFFF ;
+  //add args and return value to the top of the stack
+  myret = stack + 4096 - 2 * sizeof(int *);
+  *myret = 0xFFFFFFFF;
 
-  //finish adding arguments, go back to first address of stack
-  np->tf->esp -= 4 ;
+  myarg = stack + 4096 - sizeof(int *);
+  *myarg = (int)arg;
+
+  np->tf->esp = (uint)stack +  4096 - 2 * sizeof(int *);
+  np->tf->ebp = np->tf->esp;
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
+
+  np->ustack=stack;
 
   for(i = 0; i < NOFILE; i++)
     if(proc->ofile[i])
@@ -233,11 +239,12 @@ texit(void* retval)
 
   acquire(&ptable.lock);
 
-  // Parent might be sleeping in wait().
+  // Parent might be sleeping in join().
   wakeup1(proc->parent);
 
   //pass possible return value back to joined parent
   proc->parent->tf->eax=(uint)retval;
+  proc->retval=(uint)retval;
 
   // Pass abandoned children to parent of proc.
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -259,6 +266,47 @@ texit(void* retval)
   panic("zombie exit");
 
 
+}
+
+int
+join(void* p_id, void* stack, void* retval){
+
+  struct proc *p;
+  int havekids, pid;
+  pid = (int)p_id;
+
+  acquire(&ptable.lock);
+  for(;;){
+    // Scan through table looking for zombie children.
+    havekids = 0;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->pid != pid || p->thread != 1)
+        continue ;
+      havekids = 1;
+      if(p->state == ZOMBIE){
+        // Found one.
+        pid = p->pid;
+        kfree(p->kstack);
+        p->kstack = 0;
+        p->state = UNUSED;
+        p->pid = 0;
+        p->parent = 0;
+        p->name[0] = 0;
+        p->killed = 0;
+        release(&ptable.lock);
+        return 0;
+      }
+    }
+
+    // No point waiting if we don't have any children.
+    if(!havekids || proc->killed){
+      release(&ptable.lock);
+      return -1;
+    }
+
+    // Wait for children to exit.  (See wakeup1 call in proc_exit.)
+    sleep(proc, &ptable.lock);  //DOC: wait-sleep
+    }
 }
 
 
@@ -296,7 +344,7 @@ exit(void)
 
     //if process has thread children, kill them
     if ((p->parent == proc) && (p->thread==1)){
-      p->state = ZOMBIE;
+      p->killed = 1;
     }
 
     // Pass abandoned children to init.

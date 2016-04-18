@@ -4,7 +4,6 @@ struct rtcdate;
 // system calls
 int fork(void);
 int exit(void) __attribute__((noreturn));
-int texit(void);
 int wait(void);
 int pipe(int*);
 int write(int, void*, int);
@@ -26,6 +25,8 @@ int sleep(int);
 int uptime(void);
 int halt(void);
 int clone();
+int texit();
+int join();
 
 // ulib.c
 int stat(char*, struct stat*);

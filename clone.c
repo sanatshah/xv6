@@ -5,8 +5,9 @@
 #include "fcntl.h"
 
 void* test(void *arg){
-  printf(1,"function worked, in child thread");
+  printf(1,"function worked, in child thread\n");
 
+  texit();
 }
 
 int main(int argc, char **argv){
@@ -19,8 +20,10 @@ int main(int argc, char **argv){
 
   int x=clone(test, args, stacks);
 
+//  int y=join(x);
+
   if (x>=0){
-    printf(1,"Clone was successful");
+    printf(1,"Clone was successful\n");
 
     if(x == 0){ //child process
 
@@ -28,12 +31,15 @@ int main(int argc, char **argv){
 
     }else{ //parent process
 
-      printf(1,"this is the parent process");
+      printf(1,"this is the parent process\n");
     }
 
   } else {
     printf(1,"clone failed");
   }
 
-  texit();
+  free(stacks);
+  free(args);
+
+  exit();
 }

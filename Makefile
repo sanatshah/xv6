@@ -174,7 +174,7 @@ UPROGS=\
 	_zombie\
 	_shutdown\
 		_clone\
-#	_test_clone\
+	_test_clone\
 #	_test_pthread\
 #	_test_mutex\
 

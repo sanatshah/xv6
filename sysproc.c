@@ -16,30 +16,46 @@ sys_fork(void)
 int
 sys_clone(void)
 {
-  void *func;
-	void *arg;
-	void *stack;
+  int func;
+	int arg;
+	int stack;
 
 
-	if(argint(0,func) < -1)
+	if(argint(0,&func) < -1)
 		return -1;
-	if(argint(1,arg) < -1)
+	if(argint(1,&arg) < -1)
 		return -1;
-	if(argint(2,stack) < -1)
+	if(argint(2,&stack) < -1)
 		return -1;
 
-  return clone(func, arg, stack);
+  return clone((void *)func, (void *)arg, (void *)stack);
+}
+
+int
+sys_join(void){
+  int pid;
+	int stack;
+	int retval;
+
+  if(argint(0,&pid) < -1)
+		return -1;
+	if(argint(1,&stack) < -1)
+		return -1;
+	if(argint(2,&retval) < -1)
+		return -1;
+
+  return join((void *)pid, (void *)stack, (void *)retval);
 }
 
 int
 sys_texit(void)
 {
-  void *retval;
+  int retval;
 
-  if(argint(0,retval) < -1)
+  if(argint(0,&retval) < -1)
     return -1;
 
-  return texit(retval);
+  return texit((void *)retval);
 }
 
 int
