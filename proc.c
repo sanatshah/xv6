@@ -287,7 +287,6 @@ exit(void)
   end_op();
   proc->cwd = 0;
 
-  //pass pointer back to join
 
   acquire(&ptable.lock);
 
@@ -296,6 +295,12 @@ exit(void)
 
   // Pass abandoned children to init.
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+
+    //if process has thread children, kill em
+    if ((p->parent == proc) && (p->thread==1)){
+      p->state = zombie;
+    }
+
     if(p->parent == proc){
       p->parent = initproc;
       if(p->state == ZOMBIE)
