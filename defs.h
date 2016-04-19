@@ -121,6 +121,7 @@ void            yield(void);
 int             clone(void (*func)(void *), void *arg, void *stack);
 int            texit(void* retval);
 int            join(void* pid, void* stack, void* retval);
+void           mutex();
 int            mutex_init(void);
 int            mutex_destroy(int mutex_id);
 int            mutex_lock(int mutex_id);

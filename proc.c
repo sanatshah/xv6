@@ -12,6 +12,22 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 
+//struct ptable ptable[32];
+
+struct mtable {
+  int init;
+  int id;
+  int active;
+  int locked;
+  struct spinlock lock;
+  struct {
+    int id[32];
+  } blockedQueue;
+
+};
+
+struct mtable mtable[32];
+
 static struct proc *initproc;
 
 int nextpid = 1;
@@ -312,29 +328,64 @@ join(void* p_id, void* stack, void* retval){
     }
 }
 
+void
+mutex(){
+  int x=0;
+
+  for(x;x<32;x++){
+    acquire(&mtable[x].lock);
+    initlock(&mtable[x].lock, "Initlock");
+    release(&mtable[x].lock);
+  }
+}
+
 int
 mutex_init(void){
+  //called by main, set up mtable
+  int x=0;
+  int pid=-1;
 
+  for(x;x<32;x++){
+    acquire(&mtable[x].lock);
+      if(mtable[x].active==0){
+        mtable[x].active=1;
+        mtable[x].init=1;
+        pid=x;
+      }
+    release(&mtable[x].lock);
+  }
 
-
-
+  return pid;
 }
 
 int
 mutex_destroy (int mutex_id){
 
+  acquire(&mtable[mutex_id].lock);
 
+    mtable[mutex_id].active=0;
+    mtable[mutex_id].init=0;
 
+  release(&mtable[mutex_id].lock);
 
-
+  return 0;
 }
 
 
 int
 mutex_lock(int mutex_id){
+  int x=0;
 
+  acquire(&mtable[mutex_id].lock);
+    if (mtable[mutex_id].locked==0){
+      mtable[mutex_id].locked=1;
+    }else {
+      for(x;x<32;x++){
 
+      }
+    }
 
+  release(&mtable[mutex_id].lock);
 
 }
 
