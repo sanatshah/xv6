@@ -175,7 +175,7 @@ UPROGS=\
 	_shutdown\
 		_clone\
 	_test_clone\
-#	_test_pthread\
+	_test_pthread\
 #	_test_mutex\
 
 fs.img: mkfs README $(UPROGS)

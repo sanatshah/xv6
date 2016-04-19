@@ -7,6 +7,8 @@
 //types
 struct pthread_t {
   //define pthread_t struct here
+  int pid;
+  void* stack;
 
 
 } typedef pthread_t;

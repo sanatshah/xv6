@@ -9,14 +9,31 @@
 
 int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg)
 {
-	return 0;
+  void *stack = (void*) malloc(4096);
+  thread->pid=clone(*start_routine, arg, stack);
+  thread->stack = stack;
+
+  if (thread->pid>=0)
+    return 0;
+
+  //0 on success, on error returns negative number
+	return -1;
 }
 
 int pthread_join(pthread_t thread, void **retval)
 {
-	return 0;
+
+  int r;
+
+  pthread_t* t=&thread;
+
+  r=join(t->pid, t->stack, retval);
+
+  //has to return 0 on sucess, negative number on fail
+	return r;
 }
 int pthread_exit(void *retval)
 {
+  texit(retval);
 	return 0;
 }
