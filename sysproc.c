@@ -35,7 +35,7 @@ int
 sys_join(void){
   int pid;
 	int stack;
-	int retval;
+	int *retval;
 
   if(argint(0,&pid) < -1)
 		return -1;
