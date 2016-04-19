@@ -8,6 +8,42 @@
 #include "proc.h"
 
 int
+sys_mutex_init(void){
+
+  return mutex_init();
+}
+
+int
+sys_mutex_destroy(void){
+  int pid;
+
+	if(argint(0,&pid) < -1)
+		return -1;
+
+  return mutex_destroy(pid);
+}
+
+int
+sys_mutex_lock(void){
+  int pid;
+
+	if(argint(0,&pid) < -1)
+		return -1;
+
+  return mutex_lock(pid);
+}
+
+int
+sys_mutex_unlock(void){
+  int pid;
+
+	if(argint(0,&pid) < -1)
+		return -1;
+
+  return mutex_unlock(pid);
+}
+
+int
 sys_fork(void)
 {
   return fork();
@@ -35,7 +71,7 @@ int
 sys_join(void){
   int pid;
 	int stack;
-	int *retval;
+	int retval;
 
   if(argint(0,&pid) < -1)
 		return -1;

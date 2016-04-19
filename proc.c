@@ -312,6 +312,39 @@ join(void* p_id, void* stack, void* retval){
     }
 }
 
+int
+mutex_init(void){
+
+
+
+
+}
+
+int
+mutex_destroy (int mutex_id){
+
+
+
+
+
+}
+
+
+int
+mutex_lock(int mutex_id){
+
+
+
+
+}
+
+int
+mutex_unlock(int mutex_id){
+
+
+
+
+}
 
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state
