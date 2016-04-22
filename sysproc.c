@@ -15,7 +15,7 @@ sys_mutex_init(void){
 
 int
 sys_mutex_destroy(void){
-  int pid;
+	int pid;
 
 	if(argint(0,&pid) < -1)
 		return -1;
@@ -31,6 +31,7 @@ sys_mutex_lock(void){
 		return -1;
 
   return mutex_lock(pid);
+
 }
 
 int
