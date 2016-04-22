@@ -341,26 +341,26 @@ mutex(){
 int
 mutex_init(void){
   //called by main, set up mtable
-  int x=0;
+  static int x=0;
   int pid=-1;
 	int i=0;
-
-  //for(;x<32;x++){
-    acquire(&mtable[x].lock);
-      if(mtable[x].active==0){
-        mtable[x].active=1;
-        mtable[x].init=1;
-        
-        for(;i<NPROC;i++)
-        {
-        	mtable[x].blockedQueue[i] = 0;
-        }
-        
-        pid=x;
-      }
-    release(&mtable[x].lock);
-  //}
-
+	
+	if(x >= 32)
+		return -1;
+  
+  acquire(&mtable[x].lock);
+  if(mtable[x].active==0){
+    mtable[x].active=1;
+    mtable[x].init=1;
+    for(;i<NPROC;i++)
+    {
+    	mtable[x].blockedQueue[i] = 0;
+    }
+    pid=x;
+  }
+  release(&mtable[x].lock);
+  
+	x++;
   return pid;
 }
 
