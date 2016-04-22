@@ -15,6 +15,8 @@ struct pthread_t {
 
 struct pthread_mutex_t {
 
+  int mid;
+
 
 } typedef pthread_mutex_t;
 

@@ -344,10 +344,10 @@ mutex_init(void){
   static int x=0;
   int pid=-1;
 	int i=0;
-	
+
 	if(x >= 32)
 		return -1;
-  
+
   acquire(&mtable[x].lock);
   if(mtable[x].active==0){
     mtable[x].active=1;
@@ -359,7 +359,7 @@ mutex_init(void){
     pid=x;
   }
   release(&mtable[x].lock);
-  
+
 	x++;
   return pid;
 }
@@ -383,7 +383,7 @@ mutex_lock(int mutex_id){
   int x=0;
 
   acquire(&mtable[mutex_id].lock);
-  
+
   if (mtable[mutex_id].locked==0){
     mtable[mutex_id].locked=1;
   }else {
@@ -411,10 +411,10 @@ int
 mutex_unlock(int mutex_id){
 	int x=0;
 	struct proc *p;
-	
+
   acquire(&mtable[mutex_id].lock);
   mtable[mutex_id].locked=0;
-    
+
   for(;x<NPROC;x++){
 		if(mtable[mutex_id].blockedQueue[mtable[mutex_id].counter % NPROC]  == 0)
 		{
@@ -435,7 +435,7 @@ mutex_unlock(int mutex_id){
 			//should not get here
 			return -1;
 		}
-  } 
+  }
   release(&mtable[mutex_id].lock);
 	return 1;
 }

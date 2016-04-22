@@ -22,7 +22,6 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_
 
 int pthread_join(pthread_t thread, void **retval)
 {
-
   int r;
 
   pthread_t* t=&thread;
@@ -40,28 +39,37 @@ int pthread_exit(void *retval)
 
 int pthread_mutex_destroy(pthread_mutex_t *mutex){
 
+  int i = 0;
+  i = mutex_destroy(mutex->mid);
 
-
-
+  return i;
 }
 
 
 int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr){
 
+  int i=0;
+  i = mutex_init();
+  mutex->mid=i;
 
-
+  return i;
 }
 
 int pthread_mutex_lock(pthread_mutex_t *mutex){
 
-	
+  int i = 0;
+  i = mutex_lock(mutex->mid);
 
+  return i;
 }
-
 
 int pthread_mutex_unlock(pthread_mutex_t *mutex){
 
+  int i = 0;
+  i = mutex_unlock(mutex->mid);
+
+  return i;
 
 
-  
+
 }
