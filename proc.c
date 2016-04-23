@@ -16,12 +16,9 @@ struct {
 
 struct mtable {
   int init;
-  int id;
   int active;
   int locked;
   struct spinlock lock;
-  //int counter;						//counter for blockedQueue
-  int blockedQueue[64];		//list of blocked processes for this mutex
 
 };
 
@@ -358,10 +355,6 @@ mutex_init(void){
 			mtable[x].active=1;
 			mtable[x].init=1;
 			mtable[x].locked = 0;
-			for(;i<NPROC;i++)
-			{
-				mtable[x].blockedQueue[i] = 0;
-			}
 			pid=x;
 			release(&mtable[x].lock);
 			break;
@@ -388,69 +381,35 @@ mutex_destroy (int mutex_id){
 
 int
 mutex_lock(int mutex_id){
-  int x=0;
-
+	if(mutex_id < 0 || mutex_id > 32)
+    return -1;
+    
   acquire(&mtable[mutex_id].lock);
 
-  if (mtable[mutex_id].locked==0)
-  {
-    mtable[mutex_id].locked=1;
-    release(&mtable[mutex_id].lock);
-    return 1;
-  }
-  else
-  {
-    for(;x<NPROC;x++)
-    {
-			if(mtable[mutex_id].blockedQueue[x] == 0)
-			{
-				
-				mtable[mutex_id].blockedQueue[x]  = proc->pid;
-				
-				while(mtable[mutex_id].locked==1)
-				{
-					sleep(proc, &mtable[mutex_id].lock);
-	 				mtable[mutex_id].locked=1;
-	 				release(&mtable[mutex_id].lock);
-	 				return 1;
- 				}
-			}
-    }
-  }
-
-  release(&mtable[mutex_id].lock);
-	return -1;
+	if(mtable[mutex_id].active == 0)
+		return -1;	
+	
+	while(mtable[mutex_id].locked==1)
+	{
+		sleep(&mtable[mutex_id], &mtable[mutex_id].lock);
+	}
+	mtable[mutex_id].locked=1;
+	release(&mtable[mutex_id].lock);
+	
+	return 0;
 }
 
 int
 mutex_unlock(int mutex_id){
-	int x=0;
-	struct proc *p;
-
+	
+	if(mutex_id < 0 || mutex_id > 32)
+    return -1;
+	
   acquire(&mtable[mutex_id].lock);
+  if(mtable[mutex_id].active == 0)
+		return -1;	
   mtable[mutex_id].locked=0;
-
-  for(;x<NPROC;x++){
-		if(mtable[mutex_id].blockedQueue[x]  != 0)
-		{
-			//acquire(&ptable.lock);
-			for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)	//loop to find process
-			{
-				if(mtable[mutex_id].blockedQueue[x]  == p->pid)
-				{
-					
-					mtable[mutex_id].blockedQueue[x]  = 0;
-					wakeup1(p->chan);
-					
-					//release(&ptable.lock);
-					release(&mtable[mutex_id].lock);
-					return 1;
-				}
-			}
-			//should not get here
-			return -1;
-		}
-  }
+  wakeup(&mtable[mutex_id]);
   release(&mtable[mutex_id].lock);
 	return 1;
 }
