@@ -279,7 +279,8 @@ texit(void* retval)
   proc->state = ZOMBIE;
   sched();
   panic("zombie exit");
-
+	
+	release(&ptable.lock);
 
 }
 
@@ -324,7 +325,8 @@ join(void* p_id, void* stack, void* retval){
 
     // Wait for children to exit.  (See wakeup1 call in proc_exit.)
     sleep(proc, &ptable.lock);  //DOC: wait-sleep
-    }
+  }
+	release(&ptable.lock);
 }
 
 void
@@ -334,9 +336,9 @@ mutex(){
   for(;x<32;x++){
     acquire(&mtable[x].lock);
     initlock(&mtable[x].lock, "Initlock");
-    mtable[x].active==0;
-    mtable[x].init==1;
-    mtable[x].locked==0;
+    mtable[x].active=0;
+    mtable[x].init=1;
+    mtable[x].locked=0;
     release(&mtable[x].lock);
   }
 }
@@ -402,12 +404,12 @@ mutex_lock(int mutex_id){
     {
 			if(mtable[mutex_id].blockedQueue[x] == 0)
 			{
-				cprintf("hello1");
+				
 				mtable[mutex_id].blockedQueue[x]  = proc->pid;
 				
 				while(mtable[mutex_id].locked==1)
 				{
-					sleep(proc, &ptable.lock);
+					sleep(proc, &mtable[mutex_id].lock);
 	 				mtable[mutex_id].locked=1;
 	 				release(&mtable[mutex_id].lock);
 	 				return 1;
@@ -436,7 +438,7 @@ mutex_unlock(int mutex_id){
 			{
 				if(mtable[mutex_id].blockedQueue[x]  == p->pid)
 				{
-					cprintf("hello1");
+					
 					mtable[mutex_id].blockedQueue[x]  = 0;
 					wakeup1(p->chan);
 					
