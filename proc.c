@@ -20,7 +20,7 @@ struct mtable {
   int active;
   int locked;
   struct spinlock lock;
-  int counter;						//counter for blockedQueue
+  //int counter;						//counter for blockedQueue
   int blockedQueue[64];		//list of blocked processes for this mutex
 
 };
@@ -334,6 +334,9 @@ mutex(){
   for(;x<32;x++){
     acquire(&mtable[x].lock);
     initlock(&mtable[x].lock, "Initlock");
+    mtable[x].active==0;
+    mtable[x].init==1;
+    mtable[x].locked==0;
     release(&mtable[x].lock);
   }
 }
@@ -341,26 +344,29 @@ mutex(){
 int
 mutex_init(void){
   //called by main, set up mtable
-  static int x=0;
+  int x=0;
   int pid=-1;
 	int i=0;
 
-	if(x >= 32)
-		return -1;
+	for(;x<32;x++)
+	{
+		
+		if(mtable[x].active==0){
+			acquire(&mtable[x].lock);
+			mtable[x].active=1;
+			mtable[x].init=1;
+			mtable[x].locked = 0;
+			for(;i<NPROC;i++)
+			{
+				mtable[x].blockedQueue[i] = 0;
+			}
+			pid=x;
+			release(&mtable[x].lock);
+			break;
+		}
+	}
+  
 
-  acquire(&mtable[x].lock);
-  if(mtable[x].active==0){
-    mtable[x].active=1;
-    mtable[x].init=1;
-    for(;i<NPROC;i++)
-    {
-    	mtable[x].blockedQueue[i] = 0;
-    }
-    pid=x;
-  }
-  release(&mtable[x].lock);
-
-	x++;
   return pid;
 }
 
@@ -371,7 +377,7 @@ mutex_destroy (int mutex_id){
 
   mtable[mutex_id].active=0;
   mtable[mutex_id].init=0;
-
+	mtable[mutex_id].locked = 0;
   release(&mtable[mutex_id].lock);
 
   return 0;
@@ -384,21 +390,28 @@ mutex_lock(int mutex_id){
 
   acquire(&mtable[mutex_id].lock);
 
-  if (mtable[mutex_id].locked==0){
+  if (mtable[mutex_id].locked==0)
+  {
     mtable[mutex_id].locked=1;
-  }else {
-    for(;x<NPROC;x++){		//does not do anything if blockedQueue is full
-			if(mtable[mutex_id].blockedQueue[mtable[mutex_id].counter % NPROC] == 0)
+    release(&mtable[mutex_id].lock);
+    return 1;
+  }
+  else
+  {
+    for(;x<NPROC;x++)
+    {
+			if(mtable[mutex_id].blockedQueue[x] == 0)
 			{
-				mtable[mutex_id].counter++;
-			}
-			else
-			{
-				mtable[mutex_id].blockedQueue[mtable[mutex_id].counter % NPROC]  = proc->pid;
-				proc->state = SLEEPING;
-				sleep(proc, &ptable.lock);
-				release(&mtable[mutex_id].lock);
-				return 1;
+				cprintf("hello1");
+				mtable[mutex_id].blockedQueue[x]  = proc->pid;
+				
+				while(mtable[mutex_id].locked==1)
+				{
+					sleep(proc, &ptable.lock);
+	 				mtable[mutex_id].locked=1;
+	 				release(&mtable[mutex_id].lock);
+	 				return 1;
+ 				}
 			}
     }
   }
@@ -416,20 +429,20 @@ mutex_unlock(int mutex_id){
   mtable[mutex_id].locked=0;
 
   for(;x<NPROC;x++){
-		if(mtable[mutex_id].blockedQueue[mtable[mutex_id].counter % NPROC]  == 0)
+		if(mtable[mutex_id].blockedQueue[x]  != 0)
 		{
-			mtable[mutex_id].counter++;
-		}
-		else
-		{
+			//acquire(&ptable.lock);
 			for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)	//loop to find process
 			{
-				if(mtable[mutex_id].blockedQueue[mtable[mutex_id].counter % NPROC]  == p->pid)
+				if(mtable[mutex_id].blockedQueue[x]  == p->pid)
 				{
-					p->state = RUNNABLE;
-					acquire(&ptable.lock);
-					wakeup1(p->chan);		//do i need to acquire(&ptable.lock); ?
-					release(&ptable.lock);
+					cprintf("hello1");
+					mtable[mutex_id].blockedQueue[x]  = 0;
+					wakeup1(p->chan);
+					
+					//release(&ptable.lock);
+					release(&mtable[mutex_id].lock);
+					return 1;
 				}
 			}
 			//should not get here
